@@ -5,8 +5,11 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class WeatherService {
     private String finalUrl;
@@ -29,7 +32,21 @@ public class WeatherService {
         weather.setTemperature(jsonObject.getJSONObject("current").getDouble("temp_c"));
         weather.setFeelslikeC(jsonObject.getJSONObject("current").getDouble("feelslike_c"));
         weather.setIconUrl(jsonObject.getJSONObject("current").getJSONObject("condition").getString("icon"));
+        weather.setLat(jsonObject.getJSONObject("location").getDouble("lat"));
+        weather.setLon(jsonObject.getJSONObject("location").getDouble("lon"));
+
+        String url = "http://maps.googleapis.com/maps/api/staticmap?center="+weather.getLat()+","+weather.getLon()+"&size=400x400&zoom=12";
+        try {
+            InputStream input = new URL(url).openStream();
+            Files.deleteIfExists( Paths.get(city+".jpg"));
+            Files.copy(input, Paths.get(city+".jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         return weather;
     }
+
 
 }
